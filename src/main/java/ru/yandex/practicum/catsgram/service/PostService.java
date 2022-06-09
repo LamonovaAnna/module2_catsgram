@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PostService {
@@ -36,20 +37,23 @@ public class PostService {
     public List<Post> findAll(Integer size, Integer from, String sort) {
         List<Post> subList = new ArrayList<>();
         int indexFrom = 0;
-        if (sort.equals("asc")) {
-            posts.sort(Comparator.comparing(Post::getCreationDate));
-        } else {
-            posts.sort(Comparator.comparing(Post::getCreationDate));
-            posts.sort(Collections.reverseOrder());
-        }
-
-        for (Post post : posts) {
-            if (post.getId().equals(from)) {
-                indexFrom = posts.indexOf(post);
+        if (!posts.isEmpty()) {
+            if (sort.equals("asc")) {
+                posts.sort(Comparator.comparing(Post::getCreationDate));
+            } else {
+                posts.sort((o1, o2) -> o2.getCreationDate().compareTo(o1.getCreationDate()));
             }
-        }
-        for (int i = indexFrom; i <= size; i++) {
-            subList.add(posts.get(i));
+
+            for (Post post : posts) {
+                if (post.getId().equals(from)) {
+                    indexFrom = posts.indexOf(post);
+                }
+            }
+            if (posts.get(indexFrom) != null && size <= posts.size()) {
+                for (int i = indexFrom; i < indexFrom + size; i++) {
+                    subList.add(posts.get(i));
+                }
+            }
         }
         return subList;
     }
